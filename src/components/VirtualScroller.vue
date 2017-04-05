@@ -5,10 +5,14 @@
       <slot name="before-content"></slot>
       <component :is="contentTag" class="items" :class="contentClass" :style="itemsStyle">
         <template v-if="renderers">
+          <slot name="before-items"></slot>
           <component class="item" v-for="(item, index) in visibleItems" :key="keysEnabled && item[keyField]" :is="renderers[item[typeField]]" :item="item" :item-index="_startIndex + index"></component>
+          <slot name="after-items"></slot>
         </template>
         <template v-else>
+          <slot name="before-items"></slot>
           <slot class="item" v-for="(item, index) in visibleItems" :item="item" :item-index="_startIndex + index" :item-key="keysEnabled && item[keyField]"></slot>
+          <slot name="after-items"></slot>
         </template>
       </component>
       <slot name="after-content"></slot>
@@ -83,6 +87,22 @@ export default {
       type: [Number, String],
       default: 1,
     },
+    extraPxTop: {
+      type: [Number, String],
+      default: 0
+    },
+    extraPxBottom: {
+      type: [Number, String],
+      default: 0
+    },
+    extraItemsTop: {
+      type: [Number, String],
+      default: 0
+    },
+    extraItemsBottom: {
+      type: [Number, String],
+      default: 0
+    }
   },
 
   data: () => ({
@@ -162,7 +182,7 @@ export default {
           this._endIndex = endIndex
           this.visibleItems = this.items.slice(startIndex, endIndex)
           this.itemContainerStyle = {
-            height: l * this.itemHeight + 'px',
+            height: (l + Number(this.extraItemsTop) + Number(this.extraItemsBottom)) * Number(this.itemHeight) + Number(this.extraPxTop) + Number(this.extraPxBottom) + 'px',
           }
           this.itemsStyle = {
             marginTop: startIndex * this.itemHeight + 'px',
@@ -172,7 +192,7 @@ export default {
     },
 
     scrollToItem (index) {
-      this.$el.scrollTop = index * this.itemHeight
+      this.$el.scrollTop = (index + Number(this.extraItemsTop)) * this.itemHeight + Number(this.extraPxTop)
     },
 
     handleVisibilityChange (isVisible, entry) {
